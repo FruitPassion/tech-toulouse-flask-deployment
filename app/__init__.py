@@ -9,15 +9,32 @@ from .db import db, VisitorStats
 
 migrate = Migrate(render_as_batch=True)
 
+
+def get_database_uri():
+    """
+    DATABASE_URL is injected by the platform (postgresql://...).
+    Falls back to DB_URI (manual local config) then to a local sqlite file.
+    """
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
+        return database_url
+    return os.environ.get("DB_URI", "sqlite:///master.sqlite3")
+
+
 def create_app():
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "NOTHING_IS_SECRET")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DB_URI", "sqlite:///master.sqlite3")
+    app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri()
     app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    with app.app_context():
+        db.create_all()
 
     @app.after_request
     def after_request_(response):

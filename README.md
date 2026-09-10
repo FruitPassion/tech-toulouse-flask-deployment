@@ -35,15 +35,22 @@ $ pip install -r requirements.txt
 
 ### Set secret key and database URI
 
+On the Tech Toulouse platform, `DATABASE_URL` (PostgreSQL) and `SECRET_KEY` are
+injected automatically as environment variables, nothing to configure.
+
+For local development, set them yourself:
+
 ```bash
 # bash
-(env) $ export DB_URI="database uri"
+(env) $ export DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
 (env) $ export SECRET_KEY="secret key"
 
 # windows
-(env) > SET DB_URI=database_uri
+(env) > SET DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 (env) > SET SECRET_KEY=secret_key
 ```
+
+Without `DATABASE_URL`, the app falls back to a local `sqlite:///master.sqlite3` file.
 
 ### final run
 ```bash
